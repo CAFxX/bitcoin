@@ -1082,7 +1082,7 @@ void AcentryToJSON(const CAccountingEntry& acentry, const string& strAccount, Ar
 
 Value listtransactions(const Array& params, bool fHelp)
 {
-    if (fHelp || params.size() > 2)
+    if (fHelp || params.size() > 3)
         throw runtime_error(
             "listtransactions [account] [count=10] [from=0]\n"
             "Returns up to [count] most recent transactions skipping the first [from] transactions for account [account].");
@@ -1120,8 +1120,10 @@ Value listtransactions(const Array& params, bool fHelp)
         }
 
         // Now: iterate backwards until we have nCount items to return:
-        for (TxItems::reverse_iterator it = txByTime.rbegin(), std::advance(it, nFrom); it != txByTime.rend(); ++it)
+        for (TxItems::reverse_iterator it = txByTime.rbegin(); it != txByTime.rend(); ++it)
         {
+            if (nFrom-- > 0)
+                continue;
             CWalletTx *const pwtx = (*it).second.first;
             if (pwtx != 0)
                 ListTransactions(*pwtx, strAccount, 0, true, ret);
